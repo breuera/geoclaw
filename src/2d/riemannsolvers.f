@@ -1,6 +1,21 @@
 c-----------------------------------------------------------------------
+#ifndef AUGMENTED_RIEMANN_EIGEN_COEFFICIENTS
       subroutine riemann_aug_JCP(maxiter,meqn,mwaves,hL,hR,huL,huR,
      &   hvL,hvR,bL,bR,uL,uR,vL,vR,phiL,phiR,sE1,sE2,drytol,g,sw,fw)
+#else
+      ! Add eigen-coefficients to the function call
+      subroutine riemann_aug_JCP( maxiter, meqn, mwaves,
+     &                            hL,   hR,
+     &                            huL,  huR,
+     &                            hvL,  hvR,
+     &                            bL,   bR,
+     &                            uL,   uR,
+     &                            vL,   vR,
+     &                            phiL, phiR,
+     &                            sE1,  sE2,
+     &                            drytol, g,
+     &                            sw, beta, fw)
+#endif
 
       ! solve shallow water equations given single left and right states
       ! This solver is described in J. Comput. Phys. (6): 3089-3113, March 2008
@@ -31,7 +46,7 @@ c-----------------------------------------------------------------------
       double precision r(3,3)
       double precision lambda(3)
       double precision del(3)
-      double precision beta(3)
+      double precision beta(3) !< eigen-coefficients of the f-wave decomposition. Depending on the pre-processor variable AUGMENTED_RIEMANN_EIGEN_COEFFICIENTS beta is local or input.
 
       double precision delh,delhu,delphi,delb,delnorm
       double precision rare1st,rare2st,sdelta,raremin,raremax
