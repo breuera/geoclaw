@@ -5,7 +5,9 @@
 ! Binds GeoClaw's Fortran routines to C.
 
 ! number of f-waves in the Problem (2 shock linearization = 2, augmented = 3)
+#ifndef NUMBER_OF_FWAVES
 #define NUMBER_OF_FWAVES 3
+#endif
 
 module c_bind_riemannsolvers
   implicit none
@@ -19,7 +21,11 @@ module c_bind_riemannsolvers
                                      i_variablesLeft,  i_variablesRight,&
                                      i_dryTol, i_g,&
                                      o_netUpdatesLeft, o_netUpdatesRight,&
-                                     o_waveSpeeds ) bind(c, name='c_bind_geoclaw_riemann_aug_JCP')
+                                     o_waveSpeeds &
+#if AUGMENTED_RIEMANN_EIGEN_COEFFICIENTS
+                                    ,o_eigenCoefficients &
+#endif
+                                     ) bind(c, name='c_bind_geoclaw_riemann_aug_JCP')
   !variable declaration
     !input
     integer                                   :: i_maxIter          !< maximum number of iterations over the Riemann problem.
@@ -31,9 +37,12 @@ module c_bind_riemannsolvers
                                                  i_g                !< gravity
 
     !output
-    double precision, dimension( 3 )                :: o_netUpdatesLeft,& !< net-updates for the left cell
-                                                       o_netUpdatesRight  !< net-updates for the right cell
-    double precision, dimension( NUMBER_OF_FWAVES ) :: o_waveSpeeds       !< wave speeds/eigenvalues (negative/positive: waves travelling to the left/right cell)
+    double precision, dimension( 3 )                :: o_netUpdatesLeft,&   !< net-updates for the left cell
+                                                       o_netUpdatesRight    !< net-updates for the right cell
+    double precision, dimension( NUMBER_OF_FWAVES ) :: o_waveSpeeds         !< wave speeds/eigenvalues (negative/positive: waves travelling to the left/right cell)
+#if AUGMENTED_RIEMANN_EIGEN_COEFFICIENTS
+    double precision, dimension( NUMBER_OF_FWAVES ) :: o_eigenCoefficients  !< eigencoefficients computed in the riemann solution
+#endif
 
     !local
     integer                                              :: l_waveNumber,&   !< wave number occuring in the Riemann solution (1: left wave, 2: (if defined) corrector wave, 3: right wave)
@@ -191,7 +200,11 @@ module c_bind_riemannsolvers
   !*******************
   !* call the solver *
   !*******************
-  call riemann_aug_JCP(i_maxIter,3, NUMBER_OF_FWAVES, l_hL,l_hR,l_huL,l_huR,l_hvL,l_hvR,l_bL,l_bR,l_uL,l_uR,l_vL,l_vR,l_phiL,l_phiR,l_sE1,l_sE2,i_dryTol,i_g,o_waveSpeeds,l_fWaves)
+  call riemann_aug_JCP(i_maxIter,3, NUMBER_OF_FWAVES, l_hL,l_hR,l_huL,l_huR,l_hvL,l_hvR,l_bL,l_bR,l_uL,l_uR,l_vL,l_vR,l_phiL,l_phiR,l_sE1,l_sE2,i_dryTol,i_g,o_waveSpeeds,&
+#if AUGMENTED_RIEMANN_EIGEN_COEFFICIENTS
+     o_eigenCoefficients, &
+#endif
+      l_fWaves)
 
 
   !eliminate ghost fluxes for wall
