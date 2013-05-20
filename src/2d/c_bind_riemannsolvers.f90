@@ -30,8 +30,8 @@ module c_bind_riemannsolvers
     !input
     integer                                   :: i_maxIter          !< maximum number of iterations over the Riemann problem.
 
-    double precision, dimension(3)            :: i_variablesLeft,&  !< array containing variables of the left cell: $(h_l, hu_l, b_l)^T$
-                                                 i_variablesRight   !< array containing variables of the right cell: $(h_r, hu_r, b_r)^T$
+    double precision, dimension(4)            :: i_variablesLeft,&  !< array containing variables of the left cell: $(h_l, hu_l, hv_l, b_l)^T$
+                                                 i_variablesRight   !< array containing variables of the right cell: $(h_r, hu_r, hv_l, b_r)^T$
 
     double precision                          :: i_dryTol,&         !< dry tolerance
                                                  i_g                !< gravity
@@ -81,15 +81,14 @@ module c_bind_riemannsolvers
   ! copy cell values to local variables
   l_hL  = i_variablesLeft(1)
   l_huL = i_variablesLeft(2)
-  l_bL  = i_variablesLeft(3)
+  l_hvL = i_variablesLeft(3)
+  l_bL  = i_variablesLeft(4)
 
   l_hR  = i_variablesRight(1)
   l_huR = i_variablesRight(2)
-  l_bR  = i_variablesRight(3)
+  l_hvR = i_variablesRight(3)
+  l_bR  = i_variablesRight(4)
 
-  ! set parallel momentums to zero (TODO: limiter)
-  l_hvL = 0.d0
-  l_hvR = 0.d0
 
   !******************************************************************
   !* necessary (changed) part of the GeoClaw subroutine rpn - start *
